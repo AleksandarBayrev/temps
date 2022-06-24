@@ -1,4 +1,3 @@
-import { execAsync } from './execAsync';
 import { getTemps } from './getTemps';
 import { printTemps } from './printTemps';
 
@@ -8,9 +7,9 @@ console.log('Temps');
     if (process.argv.includes('--loop')) {
         setInterval(async () => {
             console.clear();
-            printTemps(await getTemps());
+            printTemps(await getTemps(), true);
         }, 1000);
     }
     console.clear();
-    printTemps(await getTemps());
+    printTemps(await getTemps(), true);
 })();
