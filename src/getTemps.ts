@@ -1,17 +1,8 @@
 import { StoreKeys } from "./constants";
 import { execAsync } from "./execAsync";
+import { getGPUTemp, getCPUTemp, getErrorMessage } from "./helpers";
 import { temps } from "./store";
-import { ExecAsyncResult, TempsResult } from "./types";
-
-const getErrorMessage = (sensor: string) => `No data for ${sensor} found!`;
-
-const getCPUTemp = (x: ExecAsyncResult) => {
-    return x.stdout.split('\n').find(x => x.includes('Tctl'))?.replace('\r', '').replace('Tctl:', '').replace('         ', '');
-}
-
-const getGPUTemp = (x: ExecAsyncResult) => {
-    return x.stdout.split('\n').find(x => x.indexOf('MiB') !== -1)?.split(' ').find(x => x.includes('C'));
-}
+import { TempsResult } from "./types";
 
 export const getTemps = async (): Promise<TempsResult> => {
     await execAsync('nvidia-smi').then(x => {
