@@ -5,3 +5,8 @@ export type ExecAsyncResult = {
     stdout: string
     stderr: string
 }
+
+export type TempsResult = {
+    cpu: string;
+    gpu: string;
+}

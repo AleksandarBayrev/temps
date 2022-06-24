@@ -1,0 +1,1 @@
+export const temps: Map<string, string> = new Map();

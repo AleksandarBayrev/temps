@@ -1,14 +1,27 @@
+import { StoreKeys } from "./constants";
 import { execAsync } from "./execAsync";
+import { temps } from "./store";
+import { ExecAsyncResult, TempsResult } from "./types";
 
-export const getTemps = async (): Promise<string[]> => {
-    const temps: string[] = [];
+const getErrorMessage = (sensor: string) => `No data for ${sensor} found!`;
+
+const getCPUTemp = (x: ExecAsyncResult) => {
+    return x.stdout.split('\n').find(x => x.includes('Tctl'))?.replace('\r', '').replace('Tctl:', '').replace('         ', '');
+}
+
+const getGPUTemp = (x: ExecAsyncResult) => {
+    return x.stdout.split('\n').find(x => x.indexOf('MiB') !== -1)?.split(' ').find(x => x.includes('C'));
+}
+
+export const getTemps = async (): Promise<TempsResult> => {
     await execAsync('nvidia-smi').then(x => {
-        const nvidiaTemp = x.stdout.split('\n').find(x => x.indexOf('MiB') !== -1)?.split(' ').find(x => x.includes('C'));
-        temps.push(`GPU: ${nvidiaTemp}`);
+        temps.set(StoreKeys.GPU, `GPU: ${getGPUTemp(x)}`);
     });
     await execAsync('sensors').then(x => {
-        const cpuTemp = x.stdout.split('\n').find(x => x.includes('Tctl'));
-        temps.push(`CPU: ${cpuTemp?.replace('\r', '')}`);
+        temps.set(StoreKeys.CPU, `CPU: ${getCPUTemp(x)}`);
     });
-    return temps;
+    return {
+        cpu: temps.get(StoreKeys.CPU) ?? getErrorMessage('CPU'),
+        gpu: temps.get(StoreKeys.GPU) ?? getErrorMessage('GPU')
+    };
 }
